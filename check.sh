@@ -10,11 +10,11 @@ check_vac () {
 #get the data
 a=$(curl -sX GET "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?pincode=$1&date=$2" -H  "accept: application/json" -H  "Accept-Language: hi_IN")
 #get the available doses
-b=$(jq -e '.sessions[].available_capacity_dose1'<<<"$a")
-age=$(jq -e '.sessions[].min_age_limit'<<<"$a")
+readarray -t barray < <(jq -e '.sessions[].available_capacity_dose1'<<<"$a")
+readarray -t agearray < <(jq -e '.sessions[].min_age_limit'<<<"$a")
 
 #if its empty then no centre is open
-if [ -z "$b" ];
+if [ -z "$barray" ];
 then
 #if running only once print output 
 	if [ "$4" = "1" ]; 
@@ -24,12 +24,11 @@ then
 	 
 #depending on the number of centres for that pincode b can be string separated by spaces , split string into array
 else 
-	IFS=' ' read -r -a barray <<< "$b"
-	IFS=' ' read -r -a garray <<< "$age"
-
+	centres=0
 	for index in "${!barray[@]}"
 	do
-	if [ "${garray[index]}" -le "$3" ];then
+	if [ "${agearray[index]}" -le "$3" ];then
+	centres=$((centres+1))
 	if [ "${barray[index]}" != "0" ];
 	then
 		echo "Doses found"
@@ -43,13 +42,13 @@ else
 	
 	if [ "$4" = "1" ];
 	then
-		echo ${#barray[@]} "centres open"
+		echo $centres "centres open for " $3 " and above"
 		echo "0 doses found"
 	fi
 fi
 }
 
-
+echo "Checks only for 1st dose"
 if [ "$4" = "1" ];
 then
 echo "checking only once"
