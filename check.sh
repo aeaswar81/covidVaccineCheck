@@ -4,12 +4,26 @@ a=$(curl -sX GET "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/f
 
 
 b=$(jq -e '.sessions[].available_capacity_dose1'<<<"$a")
-echo "$b"
-if [ ! -z "$b" ] && [ "$b" != "0" ] ;
+#echo "$b"
+if [ -z "$b" ];
 then
-echo "found with doses " $b
-else
-echo "not found"
+	if [ "$3" = "1" ]; 
+	then
+		echo "slot not open"
+	fi
+	 
+else 
+	if [ "$b" != "0" ] ;
+	then
+		echo $b "doses found"
+		echo "Book now \! \! "
+	else
+		if [ "$3" = "1" ];
+		then
+			echo "slot open"
+			echo "0 doses found"
+		fi
+	fi
 fi
 }
 if [ "$3" = "1" ];
@@ -18,4 +32,10 @@ echo "checking only once"
 check_vac $1 $2 $3
 else
 echo "looping"
+	while true
+	do
+		check_vac $1 $2 
+		sleep 1
+	done 
+	
 fi
