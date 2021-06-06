@@ -1,3 +1,10 @@
+#check if pincode and date is correct 
+a=$(curl -sX GET "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?pincode=$1&date=$2" -H  "accept: application/json" -H  "Accept-Language: hi_IN")
+if echo $a | grep -q "error" ; 
+then
+echo "Invalid pincode or date. Try again"
+exit
+fi
 #function to check retrieve data and check 
 check_vac () {
 #get the data
@@ -21,7 +28,7 @@ else
 	then
 		echo "Doses found"
 		echo "Book now :D "
-		zenity --info --width=400 --height=200  --text "Doses available.\nClose this box and end the script if its on loop mode" --title="Book NOW !"
+		zenity --info --width=400 --height=200  --text "Doses available.\nClose this box and end the script (Ctrl+C) if its on loop mode" --title="Book NOW !"
 
 		return 1
 	fi
